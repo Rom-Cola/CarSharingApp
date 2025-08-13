@@ -1,0 +1,17 @@
+databaseChangeLog:
+  - changeSet:
+      id: insert-default-roles
+      author: Loiev Roman
+      changes:
+        - insert:
+            tableName: roles
+            columns:
+              - column:
+                  name: name
+                  value: "MANAGER"
+        - insert:
+            tableName: roles
+            columns:
+              - column:
+                  name: name
+                  value: "CUSTOMER"
