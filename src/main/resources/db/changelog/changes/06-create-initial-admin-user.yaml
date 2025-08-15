@@ -1,0 +1,44 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-initial-admin-user
+      author: Loiev Roman
+      changes:
+        - insert:
+            tableName: users
+            columns:
+              - column:
+                  name: id
+                  valueNumeric: 1
+              - column:
+                  name: email
+                  value: "admin@carsharing.com"
+              - column:
+                  name: password
+                  value: "$2a$10$oEOBveGvV10mcGpBnuNhr.j2RqlHhc3pTg/5zdv.ch8U3aYyH/pRW"
+              - column:
+                  name: first_name
+                  value: "Admin"
+              - column:
+                  name: last_name
+                  value: "Super"
+              - column:
+                  name: is_deleted
+                  value: 0
+        - insert:
+            tableName: users_roles
+            columns:
+              - column:
+                  name: user_id
+                  valueNumeric: 1
+              - column:
+                  name: role_id
+                  valueNumeric: 1
+        - insert:
+            tableName: users_roles
+            columns:
+              - column:
+                  name: user_id
+                  valueNumeric: 1
+              - column:
+                  name: role_id
+                  valueNumeric: 2
