@@ -3,6 +3,7 @@ package com.loievroman.carsharingapp.controller;
 import com.loievroman.carsharingapp.dto.car.CarDto;
 import com.loievroman.carsharingapp.dto.car.CreateCarRequestDto;
 import com.loievroman.carsharingapp.service.CarService;
+import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -36,13 +37,16 @@ public class CarController {
 
     @PreAuthorize("hasRole('ROLE_MANAGER')")
     @PostMapping
-    public CarDto createCar(@RequestBody CreateCarRequestDto createCarRequestDto) {
+    public CarDto createCar(@Valid @RequestBody CreateCarRequestDto createCarRequestDto) {
         return carService.create(createCarRequestDto);
     }
 
     @PreAuthorize("hasRole('ROLE_MANAGER')")
     @PutMapping("/{id}")
-    public CarDto updateCar(@PathVariable Long id, @RequestBody CreateCarRequestDto carRequestDto) {
+    public CarDto updateCar(
+            @PathVariable Long id,
+            @Valid @RequestBody CreateCarRequestDto carRequestDto
+    ) {
         return carService.update(id, carRequestDto);
     }
 
