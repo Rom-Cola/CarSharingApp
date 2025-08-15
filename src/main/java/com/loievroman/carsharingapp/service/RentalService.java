@@ -11,4 +11,6 @@ public interface RentalService {
     List<RentalDto> getRentalsByUserIdAndStatus(Long userId, boolean isActive);
 
     RentalDto getRentalById(Long id);
+
+    RentalDto returnRental(Long rentalId);
 }

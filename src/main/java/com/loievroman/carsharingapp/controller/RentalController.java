@@ -45,4 +45,9 @@ public class RentalController {
         return rentalService.getRentalById(id);
     }
 
+    @PostMapping("/{id}/return")
+    @PreAuthorize("hasRole('MANAGER')")
+    public RentalDto returnRental(@PathVariable Long id) {
+        return rentalService.returnRental(id);
+    }
 }

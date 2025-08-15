@@ -4,6 +4,7 @@ import com.loievroman.carsharingapp.dto.rental.CreateRentalRequestDto;
 import com.loievroman.carsharingapp.dto.rental.RentalDto;
 import com.loievroman.carsharingapp.exception.EntityNotFoundException;
 import com.loievroman.carsharingapp.exception.NoAvailableCarsException;
+import com.loievroman.carsharingapp.exception.RentalAlreadyReturnedException;
 import com.loievroman.carsharingapp.mapper.RentalMapper;
 import com.loievroman.carsharingapp.model.Car;
 import com.loievroman.carsharingapp.model.Rental;
@@ -115,5 +116,29 @@ public class RentalServiceImpl implements RentalService {
         }
 
         return rentalMapper.toDto(rental);
+    }
+
+    @Override
+    @Transactional
+    public RentalDto returnRental(Long rentalId) {
+        Rental rental = rentalRepository.findById(rentalId)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Cannot return rental. Rental not found with id: " + rentalId
+                ));
+
+        if (rental.getActualReturnDate() != null) {
+            throw new RentalAlreadyReturnedException(
+                    "Rental with id " + rentalId + " has already been returned."
+            );
+        }
+
+        rental.setActualReturnDate(LocalDate.now());
+        Rental updatedRental = rentalRepository.save(rental);
+
+        Car carToReturn = updatedRental.getCar();
+        carToReturn.setInventory(carToReturn.getInventory() + 1);
+        carRepository.save(carToReturn);
+
+        return rentalMapper.toDto(updatedRental);
     }
 }
