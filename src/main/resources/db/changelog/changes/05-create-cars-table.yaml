@@ -39,3 +39,9 @@ databaseChangeLog:
                     nullable: false
                   name: daily_fee
                   type: DECIMAL
+              - column:
+                  name: is_deleted
+                  type: TINYINT
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
