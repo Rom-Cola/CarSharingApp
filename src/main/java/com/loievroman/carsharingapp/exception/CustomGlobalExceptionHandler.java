@@ -49,6 +49,26 @@ public class CustomGlobalExceptionHandler {
         );
     }
 
+    @ExceptionHandler(NoAvailableCarsException.class)
+    public ResponseEntity<String> handleNoAvailableCarsExceptions(
+            NoAvailableCarsException ex
+    ) {
+        return new ResponseEntity<>(
+                ex.getMessage(),
+                HttpStatus.BAD_REQUEST
+        );
+    }
+
+    @ExceptionHandler(RentalAlreadyReturnedException.class)
+    public ResponseEntity<String> handleRentalAlreadyReturnedExceptions(
+            RentalAlreadyReturnedException ex
+    ) {
+        return new ResponseEntity<>(
+                ex.getMessage(),
+                HttpStatus.BAD_REQUEST
+        );
+    }
+
     private String getErrorMessage(ObjectError objectError) {
         if (objectError instanceof FieldError fieldError) {
             return fieldError.getField()

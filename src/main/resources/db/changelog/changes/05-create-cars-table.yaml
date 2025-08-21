@@ -28,7 +28,7 @@ databaseChangeLog:
                   constraints:
                     nullable: false
                   name: type
-                  type: SMALLINT
+                  type: VARCHAR(255)
               - column:
                   constraints:
                     nullable: false
