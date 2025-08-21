@@ -1,6 +1,5 @@
 package com.loievroman.carsharingapp.dto.car;
 
-import com.loievroman.carsharingapp.model.CarType;
 import java.math.BigDecimal;
 import lombok.Getter;
 import lombok.Setter;
