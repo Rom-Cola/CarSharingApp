@@ -27,6 +27,7 @@ public class RentalServiceImpl implements RentalService {
     private final CarRepository carRepository;
     private final RentalRepository rentalRepository;
     private final RentalMapper rentalMapper;
+    private final NotificationService notificationService;
 
     @Override
     @Transactional
@@ -52,6 +53,9 @@ public class RentalServiceImpl implements RentalService {
         rental.setRentalDate(LocalDate.now());
         rental.setReturnDate(rentalRequestDto.getReturnDate());
         Rental savedRental = rentalRepository.save(rental);
+
+        notificationService.sendNewRentalNotification(rental);
+
         return rentalMapper.toDto(savedRental);
     }
 
@@ -111,7 +115,7 @@ public class RentalServiceImpl implements RentalService {
         boolean isManager = currentUser.getAuthorities().stream()
                 .anyMatch(auth -> auth.getAuthority().equals("ROLE_MANAGER"));
 
-        if (isManager || rental.getUser().getId().equals(currentUser.getId())) {
+        if (!isManager && !rental.getUser().getId().equals(currentUser.getId())) {
             throw new AccessDeniedException("You do not have permission to view this rental.");
         }
 
