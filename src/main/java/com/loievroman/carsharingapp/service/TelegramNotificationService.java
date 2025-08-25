@@ -1,10 +1,10 @@
 package com.loievroman.carsharingapp.service;
 
-import com.loievroman.carsharingapp.exception.EntityNotFoundException;
 import com.loievroman.carsharingapp.model.Rental;
 import com.loievroman.carsharingapp.repository.RentalRepository;
 import com.loievroman.carsharingapp.telegram.CarSharingBot;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -15,7 +15,8 @@ public class TelegramNotificationService implements NotificationService {
     private final RentalRepository rentalRepository;
     private final CarSharingBot carSharingBot;
 
-    private final String chatId = "-4913904012";
+    @Value("${telegram.chat.id}")
+    private String chatId;
 
     @Async
     @Override
