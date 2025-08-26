@@ -1,6 +1,7 @@
 package com.loievroman.carsharingapp.repository;
 
 import com.loievroman.carsharingapp.model.Rental;
+import java.time.LocalDate;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -14,4 +15,6 @@ public interface RentalRepository extends JpaRepository<Rental, Long> {
     List<Rental> findByActualReturnDateIsNull();
 
     List<Rental> findByActualReturnDateIsNotNull();
+
+    List<Rental> findByActualReturnDateIsNullAndReturnDateBefore(LocalDate today);
 }
