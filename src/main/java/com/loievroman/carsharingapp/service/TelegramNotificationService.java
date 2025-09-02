@@ -37,4 +37,9 @@ public class TelegramNotificationService implements NotificationService {
         carSharingBot.sendMessage(chatId, message);
     }
 
+    @Override
+    public void sendNotification(String text) {
+        carSharingBot.sendMessage(chatId, text);
+    }
+
 }
