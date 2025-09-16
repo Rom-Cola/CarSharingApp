@@ -2,6 +2,8 @@ package com.loievroman.carsharingapp.controller;
 
 import com.loievroman.carsharingapp.dto.payment.PaymentDto;
 import com.loievroman.carsharingapp.service.PaymentService;
+import com.stripe.exception.StripeException;
+import com.stripe.model.checkout.Session;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -42,5 +44,16 @@ public class PaymentController {
     public String handleCancelledPayment() {
         // ToDo: finish endpoint implementation
         return "Payment was cancelled. You can try again later.";
+    }
+
+    @GetMapping("/test")
+    public String createTestSession() {
+        try {
+            Session session = paymentService.createTestPaymentSession();
+            System.out.println("Test session URL: " + session.getUrl());
+            return "Session created! Check console for URL.";
+        } catch (StripeException e) {
+            return "Error creating session: " + e.getMessage();
+        }
     }
 }
