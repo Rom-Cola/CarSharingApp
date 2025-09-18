@@ -59,9 +59,49 @@ public class CustomGlobalExceptionHandler {
         );
     }
 
+    @ExceptionHandler(PaymentException.class)
+    public ResponseEntity<String> handlePaymentExceptions(
+            PaymentException ex
+    ) {
+        return new ResponseEntity<>(
+                ex.getMessage(),
+                HttpStatus.SERVICE_UNAVAILABLE
+        );
+    }
+
     @ExceptionHandler(RentalAlreadyReturnedException.class)
     public ResponseEntity<String> handleRentalAlreadyReturnedExceptions(
             RentalAlreadyReturnedException ex
+    ) {
+        return new ResponseEntity<>(
+                ex.getMessage(),
+                HttpStatus.BAD_REQUEST
+        );
+    }
+
+    @ExceptionHandler(PaymentAlreadyPaidException.class)
+    public ResponseEntity<String> handlePaymentAlreadyPaidExceptions(
+            PaymentAlreadyPaidException ex
+    ) {
+        return new ResponseEntity<>(
+                ex.getMessage(),
+                HttpStatus.CONFLICT
+        );
+    }
+
+    @ExceptionHandler(NoFineRequiredException.class)
+    public ResponseEntity<String> handleNoFineRequiredExceptions(
+            NoFineRequiredException ex
+    ) {
+        return new ResponseEntity<>(
+                ex.getMessage(),
+                HttpStatus.CONFLICT
+        );
+    }
+
+    @ExceptionHandler(FineCalculationForActiveRentalException.class)
+    public ResponseEntity<String> handleFineCalculationForActiveRentalExceptions(
+            FineCalculationForActiveRentalException ex
     ) {
         return new ResponseEntity<>(
                 ex.getMessage(),

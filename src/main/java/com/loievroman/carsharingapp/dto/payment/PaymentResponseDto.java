@@ -8,4 +8,5 @@ import lombok.Setter;
 public class PaymentResponseDto {
     private String sessionUrl;
     private String sessionId;
+    private String status;
 }

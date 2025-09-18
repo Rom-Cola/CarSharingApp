@@ -1,14 +1,16 @@
 package com.loievroman.carsharingapp.controller;
 
+import com.loievroman.carsharingapp.dto.payment.CreatePaymentRequestDto;
 import com.loievroman.carsharingapp.dto.payment.PaymentDto;
+import com.loievroman.carsharingapp.dto.payment.PaymentResponseDto;
 import com.loievroman.carsharingapp.service.PaymentService;
-import com.stripe.exception.StripeException;
-import com.stripe.model.checkout.Session;
+import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -28,10 +30,11 @@ public class PaymentController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('CUSTOMER')")
-    public String createPaymentSession() {
-        // ToDo: finish endpoint implementation
-        return "Payment session creation endpoint is not implemented yet.";
+    @PreAuthorize("hasRole('ROLE_CUSTOMER')")
+    public PaymentResponseDto createPaymentSession(
+            @Valid @RequestBody CreatePaymentRequestDto requestDto
+    ) {
+        return paymentService.createPaymentSession(requestDto);
     }
 
     @GetMapping("/success")
@@ -46,14 +49,4 @@ public class PaymentController {
         return "Payment was cancelled. You can try again later.";
     }
 
-    @GetMapping("/test")
-    public String createTestSession() {
-        try {
-            Session session = paymentService.createTestPaymentSession();
-            System.out.println("Test session URL: " + session.getUrl());
-            return "Session created! Check console for URL.";
-        } catch (StripeException e) {
-            return "Error creating session: " + e.getMessage();
-        }
-    }
 }

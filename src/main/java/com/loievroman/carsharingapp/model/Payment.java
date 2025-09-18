@@ -10,6 +10,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import java.math.BigDecimal;
 import lombok.Getter;
 import lombok.Setter;
@@ -17,7 +18,9 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name = "payments")
+@Table(name = "payments", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"rental_id", "type"})
+})
 public class Payment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
