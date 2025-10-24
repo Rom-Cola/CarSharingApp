@@ -3,11 +3,14 @@ package com.loievroman.carsharingapp.controller;
 import com.loievroman.carsharingapp.dto.payment.CreatePaymentRequestDto;
 import com.loievroman.carsharingapp.dto.payment.PaymentDto;
 import com.loievroman.carsharingapp.dto.payment.PaymentResponseDto;
+import com.loievroman.carsharingapp.dto.payment.PaymentStatusResponseDto;
+import com.loievroman.carsharingapp.model.User;
 import com.loievroman.carsharingapp.service.PaymentService;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -24,9 +27,24 @@ public class PaymentController {
 
     @GetMapping
     @PreAuthorize("hasRole('ROLE_CUSTOMER')")
-    public List<PaymentDto> getPayments(@RequestParam(required = false) Long userId) {
+    public List<PaymentDto> getPayments(@RequestParam(required = false) Long userId,
+                                        Authentication authentication) {
 
-        return paymentService.getPayments(userId);
+        User currentUser = (User) authentication.getPrincipal();
+
+        boolean isManager = currentUser.getAuthorities().stream()
+                .anyMatch(
+                        auth -> auth
+                                .getAuthority().equals("Role_Manager")
+                );
+        if (isManager) {
+            if (userId != null) {
+                return paymentService.findByUserId(userId);
+            } else {
+                return paymentService.findAll();
+            }
+        }
+        return paymentService.findByUserId(currentUser.getId());
     }
 
     @PostMapping
@@ -38,15 +56,17 @@ public class PaymentController {
     }
 
     @GetMapping("/success")
-    public String handleSuccessfulPayment() {
-        // ToDo: finish endpoint implementation
-        return "Payment was successful! (This endpoint is not fully implemented yet).";
+    @PreAuthorize("hasRole('ROLE_CUSTOMER')")
+    public PaymentStatusResponseDto handleSuccessfulPayment(
+            @RequestParam("session_id") String sessionId) {
+        return paymentService.handleSuccessfulPayment(sessionId);
     }
 
     @GetMapping("/cancel")
-    public String handleCancelledPayment() {
-        // ToDo: finish endpoint implementation
-        return "Payment was cancelled. You can try again later.";
+    @PreAuthorize("hasRole('ROLE_CUSTOMER')")
+    public PaymentStatusResponseDto handleCancelledPayment(
+            @RequestParam("session_id") String sessionId) {
+        return paymentService.handleCancelledPayment(sessionId);
     }
 
 }

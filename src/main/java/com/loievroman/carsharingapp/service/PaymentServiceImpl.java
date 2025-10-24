@@ -3,6 +3,7 @@ package com.loievroman.carsharingapp.service;
 import com.loievroman.carsharingapp.dto.payment.CreatePaymentRequestDto;
 import com.loievroman.carsharingapp.dto.payment.PaymentDto;
 import com.loievroman.carsharingapp.dto.payment.PaymentResponseDto;
+import com.loievroman.carsharingapp.dto.payment.PaymentStatusResponseDto;
 import com.loievroman.carsharingapp.exception.EntityNotFoundException;
 import com.loievroman.carsharingapp.exception.NoFineRequiredException;
 import com.loievroman.carsharingapp.exception.PaymentAlreadyPaidException;
@@ -31,14 +32,59 @@ public class PaymentServiceImpl implements PaymentService {
     private static final String SUCCESS_URL = "http://localhost:8080/payments/success";
     private static final String CANCEL_URL = "http://localhost:8080/payments/cancel";
     private static final BigDecimal FINE_MULTIPLIER = new BigDecimal("1.5");
+    private static final String RESPONSE_SUCCESS_STATUS = "SUCCESS";
+    private static final String RESPONSE_PENDING_STATUS = "PENDING";
+    private static final String RESPONSE_CANCELLED_STATUS = "CANCELLED";
     private final RentalRepository rentalRepository;
     private final PaymentRepository paymentRepository;
     private final PaymentMapper paymentMapper;
 
     @Override
-    public List<PaymentDto> getPayments(Long userId) {
-        // TODO: finish implementation
-        return List.of();
+    public List<PaymentDto> findByUserId(Long userId) {
+        return paymentRepository.findByUserId(userId).stream()
+                .map(paymentMapper::toDto)
+                .toList();
+    }
+
+    @Override
+    @Transactional
+    public PaymentStatusResponseDto handleSuccessfulPayment(String sessionId) {
+        try {
+            Session session = Session.retrieve(sessionId);
+
+            String paymentStatusFromStripe = session.getPaymentStatus();
+
+            PaymentStatusResponseDto response = new PaymentStatusResponseDto();
+
+            if (paymentStatusFromStripe.equalsIgnoreCase("paid")) {
+                Payment payment = paymentRepository.findBySessionId(sessionId)
+                        .orElseThrow(() -> new EntityNotFoundException("Payment not found "
+                                + " for session id: " + sessionId));
+
+                if (payment.getStatus() == PaymentStatus.PAID) {
+                    response.setStatus(RESPONSE_SUCCESS_STATUS);
+                    response.setMessage("This payment has already been successfully processed.");
+                    return response;
+                }
+
+                payment.setStatus(PaymentStatus.PAID);
+                paymentRepository.save(payment);
+
+                response.setStatus(RESPONSE_SUCCESS_STATUS);
+                response.setMessage("Your payment was processed successfully!");
+                return response;
+            } else {
+
+                response.setStatus(RESPONSE_PENDING_STATUS);
+                response.setMessage(
+                        "Payment is not confirmed yet. Status: " + paymentStatusFromStripe);
+
+                return response;
+            }
+
+        } catch (StripeException e) {
+            throw new PaymentException("Error retrieving session from Stripe: " + e.getMessage());
+        }
     }
 
     @Override
@@ -101,6 +147,23 @@ public class PaymentServiceImpl implements PaymentService {
         }
     }
 
+    @Override
+    public PaymentStatusResponseDto handleCancelledPayment(String sessionId) {
+        PaymentStatusResponseDto response = new PaymentStatusResponseDto();
+        response.setStatus(RESPONSE_CANCELLED_STATUS);
+        response.setMessage(
+                "Payment was cancelled. "
+                        + "You can try to pay again from your profile. "
+                        + "The session is available for 24 hours.");
+        return response;
+    }
+
+    @Override
+    public List<PaymentDto> findAll() {
+        return paymentRepository.findAll().stream()
+                .map(paymentMapper::toDto).toList();
+    }
+
     private BigDecimal calculateAmount(Rental rental, PaymentType paymentType) {
         if (paymentType == PaymentType.PAYMENT) {
             return calculateRegularPaymentAmount(rental);
@@ -128,7 +191,7 @@ public class PaymentServiceImpl implements PaymentService {
         if (rental.getActualReturnDate() == null) {
             throw new IllegalStateException(
                     "Cannot calculate fine for an active rental. "
-                    + "The car must be returned first.");
+                            + "The car must be returned first.");
         }
 
         BigDecimal dailyFee = rental.getCar().getDailyFee();
