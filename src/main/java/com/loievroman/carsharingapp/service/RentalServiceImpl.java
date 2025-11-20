@@ -16,8 +16,6 @@ import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,7 +29,7 @@ public class RentalServiceImpl implements RentalService {
 
     @Override
     @Transactional
-    public RentalDto createRental(CreateRentalRequestDto rentalRequestDto) {
+    public RentalDto createRental(CreateRentalRequestDto rentalRequestDto, User user) {
         Car car = carRepository.findById(rentalRequestDto.getCarId())
                 .orElseThrow(() -> new EntityNotFoundException(
                         "Car not found with id: " + rentalRequestDto.getCarId()
@@ -46,10 +44,7 @@ public class RentalServiceImpl implements RentalService {
         Rental rental = new Rental();
         rental.setCar(car);
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        User currentUser = (User) authentication.getPrincipal();
-        rental.setUser(currentUser);
+        rental.setUser(user);
         rental.setRentalDate(LocalDate.now());
         rental.setReturnDate(rentalRequestDto.getReturnDate());
         Rental savedRental = rentalRepository.save(rental);
@@ -60,9 +55,11 @@ public class RentalServiceImpl implements RentalService {
     }
 
     @Override
-    public List<RentalDto> getRentalsByUserIdAndStatus(Long userId, boolean isActive) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User currentUser = (User) authentication.getPrincipal();
+    public List<RentalDto> getRentalsByUserIdAndStatus(
+            Long userId,
+            User currentUser,
+            boolean isActive
+    ) {
 
         if (currentUser.getRoles().stream().anyMatch(
                 r -> r.getName().equals(Role.RoleName.MANAGER
@@ -105,12 +102,9 @@ public class RentalServiceImpl implements RentalService {
     }
 
     @Override
-    public RentalDto getRentalById(Long id) {
+    public RentalDto getRentalById(Long id, User currentUser) {
         Rental rental = rentalRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Rental not found with id: " + id));
-
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User currentUser = (User) authentication.getPrincipal();
 
         boolean isManager = currentUser.getAuthorities().stream()
                 .anyMatch(auth -> auth.getAuthority().equals("ROLE_MANAGER"));

@@ -35,7 +35,7 @@ public class PaymentController {
         boolean isManager = currentUser.getAuthorities().stream()
                 .anyMatch(
                         auth -> auth
-                                .getAuthority().equals("Role_Manager")
+                                .getAuthority().equals("ROLE_MANAGER")
                 );
         if (isManager) {
             if (userId != null) {
