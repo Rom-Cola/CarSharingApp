@@ -39,7 +39,7 @@ public class RentalScheduler {
                                 rental.getCar().getModel(),
                                 rental.getCar().getId(),
                                 rental.getReturnDate().toString()
-                     )
+                        )
                 );
 
             }
