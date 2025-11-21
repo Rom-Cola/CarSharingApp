@@ -5,6 +5,7 @@ import com.loievroman.carsharingapp.dto.payment.PaymentDto;
 import com.loievroman.carsharingapp.dto.payment.PaymentResponseDto;
 import com.loievroman.carsharingapp.dto.payment.PaymentStatusResponseDto;
 import com.loievroman.carsharingapp.exception.EntityNotFoundException;
+import com.loievroman.carsharingapp.exception.FineCalculationForActiveRentalException;
 import com.loievroman.carsharingapp.exception.NoFineRequiredException;
 import com.loievroman.carsharingapp.exception.PaymentAlreadyPaidException;
 import com.loievroman.carsharingapp.exception.PaymentException;
@@ -97,7 +98,7 @@ public class PaymentServiceImpl implements PaymentService {
 
         if (existingPayment.isPresent()
                 && existingPayment.get().getStatus() == PaymentStatus.PENDING) {
-            return buildResponseDto(existingPayment.get());
+            return paymentMapper.toResponseDto(existingPayment.get());
         }
 
         if (existingPayment.isPresent()
@@ -189,7 +190,7 @@ public class PaymentServiceImpl implements PaymentService {
 
     private BigDecimal calculateFineAmount(Rental rental) {
         if (rental.getActualReturnDate() == null) {
-            throw new IllegalStateException(
+            throw new FineCalculationForActiveRentalException(
                     "Cannot calculate fine for an active rental. "
                             + "The car must be returned first.");
         }
@@ -204,14 +205,6 @@ public class PaymentServiceImpl implements PaymentService {
 
         BigDecimal baseFine = dailyFee.multiply(BigDecimal.valueOf(overdueDays));
         return baseFine.multiply(FINE_MULTIPLIER);
-    }
-
-    private PaymentResponseDto buildResponseDto(Payment payment) {
-        PaymentResponseDto responseDto = new PaymentResponseDto();
-        responseDto.setSessionUrl(payment.getSessionUrl());
-        responseDto.setSessionId(payment.getSessionId());
-        responseDto.setStatus(payment.getStatus().name());
-        return responseDto;
     }
 
     private SessionCreateParams buildSessionParams(Payment payment) {
