@@ -39,6 +39,7 @@ public class PaymentServiceImpl implements PaymentService {
     private final RentalRepository rentalRepository;
     private final PaymentRepository paymentRepository;
     private final PaymentMapper paymentMapper;
+    private final NotificationService telegramNotificationService;
 
     @Override
     public List<PaymentDto> findByUserId(Long userId) {
@@ -70,6 +71,8 @@ public class PaymentServiceImpl implements PaymentService {
 
                 payment.setStatus(PaymentStatus.PAID);
                 paymentRepository.save(payment);
+
+                telegramNotificationService.sendPaymentConfirmedNotification(payment);
 
                 response.setStatus(RESPONSE_SUCCESS_STATUS);
                 response.setMessage("Your payment was processed successfully!");
