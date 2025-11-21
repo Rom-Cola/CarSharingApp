@@ -29,7 +29,6 @@ public class PaymentController {
     @PreAuthorize("hasRole('ROLE_CUSTOMER')")
     public List<PaymentDto> getPayments(@RequestParam(required = false) Long userId,
                                         Authentication authentication) {
-
         User currentUser = (User) authentication.getPrincipal();
 
         boolean isManager = currentUser.getAuthorities().stream()
