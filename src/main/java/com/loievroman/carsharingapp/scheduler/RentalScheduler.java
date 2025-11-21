@@ -23,27 +23,9 @@ public class RentalScheduler {
         if (overdueRentals.isEmpty()) {
             notificationService.sendNotification("No overdue rentals for today!");
         } else {
-            StringBuilder stringBuilder = new StringBuilder("**OVERDUE RENTALS ALERT!**");
             for (Rental rental : overdueRentals) {
-                stringBuilder.append(
-                        String.format(
-                                "\n\n  - Rental ID: %d\n"
-                                        + "    Client: %s %s (ID: %d)\n"
-                                        + "    Car: %s %s (ID: %d)\n"
-                                        + "    Return date was: %s",
-                                rental.getId(),
-                                rental.getUser().getFirstName(),
-                                rental.getUser().getLastName(),
-                                rental.getUser().getId(),
-                                rental.getCar().getBrand(),
-                                rental.getCar().getModel(),
-                                rental.getCar().getId(),
-                                rental.getReturnDate().toString()
-                        )
-                );
-
+                notificationService.sendOverdueRentalReminder(rental);
             }
-            notificationService.sendNotification(stringBuilder.toString());
         }
     }
 }

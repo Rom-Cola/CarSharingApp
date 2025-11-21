@@ -137,6 +137,8 @@ public class RentalServiceImpl implements RentalService {
         carToReturn.setInventory(carToReturn.getInventory() + 1);
         carRepository.save(carToReturn);
 
+        notificationService.sendRentalReturnedNotification(updatedRental);
+
         return rentalMapper.toDto(updatedRental);
     }
 }
