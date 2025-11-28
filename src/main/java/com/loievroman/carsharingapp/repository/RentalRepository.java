@@ -3,18 +3,20 @@ package com.loievroman.carsharingapp.repository;
 import com.loievroman.carsharingapp.model.Rental;
 import java.time.LocalDate;
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
 public interface RentalRepository extends JpaRepository<Rental, Long> {
-    List<Rental> findByUserIdAndActualReturnDateIsNull(Long userId);
+    Page<Rental> findByUserIdAndActualReturnDateIsNull(Long userId, Pageable pageable);
 
-    List<Rental> findByUserIdAndActualReturnDateIsNotNull(Long userId);
+    Page<Rental> findByUserIdAndActualReturnDateIsNotNull(Long userId, Pageable pageable);
 
-    List<Rental> findByActualReturnDateIsNull();
+    Page<Rental> findByActualReturnDateIsNull(Pageable pageable);
 
-    List<Rental> findByActualReturnDateIsNotNull();
+    Page<Rental> findByActualReturnDateIsNotNull(Pageable pageable);
 
     List<Rental> findByActualReturnDateIsNullAndReturnDateBefore(LocalDate today);
 }

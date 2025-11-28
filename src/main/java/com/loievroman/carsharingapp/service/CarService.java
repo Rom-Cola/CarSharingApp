@@ -2,7 +2,8 @@ package com.loievroman.carsharingapp.service;
 
 import com.loievroman.carsharingapp.dto.car.CarDto;
 import com.loievroman.carsharingapp.dto.car.CreateCarRequestDto;
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface CarService {
 
@@ -10,7 +11,7 @@ public interface CarService {
 
     CarDto findById(Long id);
 
-    List<CarDto> findAll();
+    Page<CarDto> findAll(Pageable pageable);
 
     CarDto update(Long id, CreateCarRequestDto requestDto);
 

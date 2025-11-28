@@ -4,8 +4,9 @@ import com.loievroman.carsharingapp.dto.car.CarDto;
 import com.loievroman.carsharingapp.dto.car.CreateCarRequestDto;
 import com.loievroman.carsharingapp.service.CarService;
 import jakarta.validation.Valid;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,8 +32,8 @@ public class CarController {
 
     @PreAuthorize("hasRole('ROLE_CUSTOMER')")
     @GetMapping
-    public List<CarDto> findAll() {
-        return carService.findAll();
+    public Page<CarDto> findAll(Pageable pageable) {
+        return carService.findAll(pageable);
     }
 
     @PreAuthorize("hasRole('ROLE_MANAGER')")

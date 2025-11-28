@@ -4,10 +4,11 @@ import com.loievroman.carsharingapp.dto.payment.CreatePaymentRequestDto;
 import com.loievroman.carsharingapp.dto.payment.PaymentDto;
 import com.loievroman.carsharingapp.dto.payment.PaymentResponseDto;
 import com.loievroman.carsharingapp.dto.payment.PaymentStatusResponseDto;
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface PaymentService {
-    List<PaymentDto> findByUserId(Long userId);
+    Page<PaymentDto> findByUserId(Long userId, Pageable pageable);
 
     PaymentStatusResponseDto handleSuccessfulPayment(String sessionId);
 
@@ -15,5 +16,5 @@ public interface PaymentService {
 
     PaymentStatusResponseDto handleCancelledPayment(String sessionId);
 
-    List<PaymentDto> findAll();
+    Page<PaymentDto> findAll(Pageable pageable);
 }

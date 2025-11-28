@@ -5,8 +5,9 @@ import com.loievroman.carsharingapp.dto.rental.RentalDto;
 import com.loievroman.carsharingapp.model.User;
 import com.loievroman.carsharingapp.service.RentalService;
 import jakarta.validation.Valid;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -39,13 +40,14 @@ public class RentalController {
 
     @GetMapping
     @PreAuthorize("isAuthenticated()")
-    public List<RentalDto> getRentals(
+    public Page<RentalDto> getRentals(
             @RequestParam(required = false) Long userId,
             @RequestParam(defaultValue = "true") boolean isActive,
-            Authentication authentication
+            Authentication authentication,
+            Pageable pageable
     ) {
         User currentUser = (User) authentication.getPrincipal();
-        return rentalService.getRentalsByUserIdAndStatus(userId, currentUser, isActive);
+        return rentalService.getRentalsByUserIdAndStatus(userId, currentUser, isActive, pageable);
     }
 
     @GetMapping("/{id}")
