@@ -7,8 +7,9 @@ import com.loievroman.carsharingapp.dto.payment.PaymentStatusResponseDto;
 import com.loievroman.carsharingapp.model.User;
 import com.loievroman.carsharingapp.service.PaymentService;
 import jakarta.validation.Valid;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,8 +28,11 @@ public class PaymentController {
 
     @GetMapping
     @PreAuthorize("hasRole('ROLE_CUSTOMER')")
-    public List<PaymentDto> getPayments(@RequestParam(required = false) Long userId,
-                                        Authentication authentication) {
+    public Page<PaymentDto> getPayments(
+            @RequestParam(required = false) Long userId,
+            Authentication authentication,
+            Pageable pageable
+    ) {
         User currentUser = (User) authentication.getPrincipal();
 
         boolean isManager = currentUser.getAuthorities().stream()
@@ -38,12 +42,12 @@ public class PaymentController {
                 );
         if (isManager) {
             if (userId != null) {
-                return paymentService.findByUserId(userId);
+                return paymentService.findByUserId(userId, pageable);
             } else {
-                return paymentService.findAll();
+                return paymentService.findAll(pageable);
             }
         }
-        return paymentService.findByUserId(currentUser.getId());
+        return paymentService.findByUserId(currentUser.getId(), pageable);
     }
 
     @PostMapping

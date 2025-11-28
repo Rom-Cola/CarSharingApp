@@ -22,9 +22,10 @@ import com.stripe.param.checkout.SessionCreateParams;
 import jakarta.transaction.Transactional;
 import java.math.BigDecimal;
 import java.time.temporal.ChronoUnit;
-import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -42,10 +43,9 @@ public class PaymentServiceImpl implements PaymentService {
     private final NotificationService telegramNotificationService;
 
     @Override
-    public List<PaymentDto> findByUserId(Long userId) {
-        return paymentRepository.findByUserId(userId).stream()
-                .map(paymentMapper::toDto)
-                .toList();
+    public Page<PaymentDto> findByUserId(Long userId, Pageable pageable) {
+        return paymentRepository.findByUserId(userId, pageable)
+                .map(paymentMapper::toDto);
     }
 
     @Override
@@ -163,9 +163,9 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
-    public List<PaymentDto> findAll() {
-        return paymentRepository.findAll().stream()
-                .map(paymentMapper::toDto).toList();
+    public Page<PaymentDto> findAll(Pageable pageable) {
+        return paymentRepository.findAll(pageable)
+                .map(paymentMapper::toDto);
     }
 
     private BigDecimal calculateAmount(Rental rental, PaymentType paymentType) {

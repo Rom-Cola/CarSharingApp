@@ -13,8 +13,9 @@ import com.loievroman.carsharingapp.model.User;
 import com.loievroman.carsharingapp.repository.CarRepository;
 import com.loievroman.carsharingapp.repository.RentalRepository;
 import java.time.LocalDate;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -55,50 +56,50 @@ public class RentalServiceImpl implements RentalService {
     }
 
     @Override
-    public List<RentalDto> getRentalsByUserIdAndStatus(
+    public Page<RentalDto> getRentalsByUserIdAndStatus(
             Long userId,
             User currentUser,
-            boolean isActive
+            boolean isActive,
+            Pageable pageable
     ) {
 
         if (currentUser.getRoles().stream().anyMatch(
                 r -> r.getName().equals(Role.RoleName.MANAGER
                 ))) {
-            return findRentalsForManager(userId, isActive);
+            return findRentalsForManager(userId, isActive, pageable);
         } else {
-            return findRentalsForCustomer(currentUser.getId(), isActive);
+            return findRentalsForCustomer(currentUser.getId(), isActive, pageable);
         }
     }
 
-    private List<RentalDto> findRentalsForManager(Long userId, boolean isActive) {
-        List<Rental> rentals;
+    private Page<RentalDto> findRentalsForManager(Long userId, boolean isActive,
+                                                  Pageable pageable) {
+        Page<Rental> rentals;
         if (userId != null) {
-            return findRentalsForCustomer(userId, isActive);
+            return findRentalsForCustomer(userId, isActive, pageable);
         } else {
             if (isActive) {
-                rentals = rentalRepository.findByActualReturnDateIsNull();
+                rentals = rentalRepository.findByActualReturnDateIsNull(pageable);
             } else {
-                rentals = rentalRepository.findByActualReturnDateIsNotNull();
+                rentals = rentalRepository.findByActualReturnDateIsNotNull(pageable);
             }
         }
 
-        return rentals.stream()
-                .map(rentalMapper::toDto)
-                .toList();
+        return rentals.map(rentalMapper::toDto);
     }
 
-    private List<RentalDto> findRentalsForCustomer(Long customerId, boolean isActive) {
-        List<Rental> rentals;
+    private Page<RentalDto> findRentalsForCustomer(Long customerId, boolean isActive,
+                                                   Pageable pageable) {
+        Page<Rental> rentals;
 
         if (isActive) {
-            rentals = rentalRepository.findByUserIdAndActualReturnDateIsNull(customerId);
+            rentals = rentalRepository.findByUserIdAndActualReturnDateIsNull(customerId, pageable);
         } else {
-            rentals = rentalRepository.findByUserIdAndActualReturnDateIsNotNull(customerId);
+            rentals =
+                    rentalRepository.findByUserIdAndActualReturnDateIsNotNull(customerId, pageable);
         }
 
-        return rentals.stream()
-                .map(rentalMapper::toDto)
-                .toList();
+        return rentals.map(rentalMapper::toDto);
     }
 
     @Override

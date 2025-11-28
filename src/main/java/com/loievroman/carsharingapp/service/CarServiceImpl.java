@@ -6,9 +6,10 @@ import com.loievroman.carsharingapp.exception.EntityNotFoundException;
 import com.loievroman.carsharingapp.mapper.CarMapper;
 import com.loievroman.carsharingapp.model.Car;
 import com.loievroman.carsharingapp.repository.CarRepository;
-import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
@@ -32,11 +33,9 @@ public class CarServiceImpl implements CarService {
     }
 
     @Override
-    public List<CarDto> findAll() {
-        List<Car> carList = carRepository.findAll();
-        return carList.stream()
-                .map(carMapper::toDto)
-                .toList();
+    public Page<CarDto> findAll(Pageable pageable) {
+        Page<Car> carPage = carRepository.findAll(pageable);
+        return carPage.map(carMapper::toDto);
     }
 
     @Override
