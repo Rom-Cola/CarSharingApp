@@ -10,10 +10,13 @@ public interface RentalService {
 
     RentalDto createRental(CreateRentalRequestDto rentalRequestDto, User user);
 
-    Page<RentalDto> getRentalsByUserIdAndStatus(Long userId, User currentUser, boolean isActive,
-                                                Pageable pageable);
+    RentalDto findById(Long id);
 
-    RentalDto getRentalById(Long id, User currentUser);
+    RentalDto findMyRentalById(Long rentalId, Long userId);
 
     RentalDto returnRental(Long rentalId);
+
+    Page<RentalDto> findByUserIdAndStatus(Long userId, boolean isActive, Pageable pageable);
+
+    Page<RentalDto> findAllByStatus(boolean isActive, Pageable pageable);
 }

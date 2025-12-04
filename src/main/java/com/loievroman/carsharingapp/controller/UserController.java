@@ -3,20 +3,25 @@ package com.loievroman.carsharingapp.controller;
 import com.loievroman.carsharingapp.dto.user.UserProfileResponseDto;
 import com.loievroman.carsharingapp.dto.user.UserProfileUpdateRequestDto;
 import com.loievroman.carsharingapp.dto.user.UserRoleUpdateRequestDto;
+import com.loievroman.carsharingapp.model.User;
 import com.loievroman.carsharingapp.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "User Management", description = "Endpoints for managing user profiles and roles")
 @RestController
 @RequestMapping("/users")
 @RequiredArgsConstructor
@@ -26,44 +31,48 @@ public class UserController {
 
     @PutMapping("/{id}/role")
     @PreAuthorize("hasRole('MANAGER')")
-    public UserProfileResponseDto updateUserRole(
+    @Operation(summary = "Update user roles (Admin)",
+            description = "Sets a new collection of roles for a specific user. "
+                    + "Replaces all existing roles.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Roles updated successfully"),
+            @ApiResponse(responseCode = "403",
+                    description = "Access denied"),
+            @ApiResponse(responseCode = "404",
+                    description = "User or Role not found")
+    })
+    public UserProfileResponseDto updateUserRoles(
             @PathVariable Long id,
             @RequestBody @Valid UserRoleUpdateRequestDto requestDto
     ) {
-        return userService.updateRole(id, requestDto);
+        return userService.updateRoles(id, requestDto);
     }
 
     @GetMapping("/me")
-    @PreAuthorize("isAuthenticated()")
-    public UserProfileResponseDto getMyProfile(Authentication authentication) {
-        return userService.getMyProfile(authentication);
+    @PreAuthorize("hasRole('CUSTOMER')")
+    @Operation(
+            summary = "Get my profile info",
+            description = "Retrieves the profile information for the currently authenticated user."
+    )
+    @ApiResponse(responseCode = "200", description = "Successfully retrieved profile information")
+    public UserProfileResponseDto getMyProfile(@AuthenticationPrincipal User currentUser) {
+        return userService.getMyProfile(currentUser);
     }
 
-    @PutMapping("/me")
-    @PreAuthorize("isAuthenticated()")
+    @PatchMapping("/me")
+    @PreAuthorize("hasRole('CUSTOMER')")
+    @Operation(summary = "Update my profile",
+            description = "Allows the authenticated user to update their profile information.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Profile updated successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid data provided for update")
+    })
     public UserProfileResponseDto updateMyProfile(
-            Authentication authentication,
+            @AuthenticationPrincipal User currentUser,
             @RequestBody @Valid UserProfileUpdateRequestDto requestDto
     ) {
-        return userService.updateMyProfile(authentication, requestDto);
-    }
-
-    @PostMapping("/{id}/role") // Додає роль
-    @PreAuthorize("hasRole('MANAGER')")
-    public UserProfileResponseDto addRole(
-            @PathVariable Long id,
-            @RequestBody @Valid UserRoleUpdateRequestDto requestDto
-    ) {
-        return userService.addRoleToUser(id, requestDto);
-    }
-
-    @DeleteMapping("/{id}/role") // Видаляє роль
-    @PreAuthorize("hasRole('MANAGER')")
-    public UserProfileResponseDto removeRole(
-            @PathVariable Long id,
-            @RequestBody @Valid UserRoleUpdateRequestDto requestDto
-    ) {
-        return userService.removeRoleFromUser(id, requestDto);
+        return userService.updateMyProfile(currentUser, requestDto);
     }
 
 }

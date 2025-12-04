@@ -75,7 +75,7 @@ public class CustomGlobalExceptionHandler {
     ) {
         return new ResponseEntity<>(
                 ex.getMessage(),
-                HttpStatus.BAD_REQUEST
+                HttpStatus.CONFLICT
         );
     }
 
