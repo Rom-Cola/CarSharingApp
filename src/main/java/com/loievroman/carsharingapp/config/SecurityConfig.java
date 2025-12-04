@@ -3,10 +3,10 @@ package com.loievroman.carsharingapp.config;
 import static org.springframework.security.config.Customizer.withDefaults;
 
 import com.loievroman.carsharingapp.security.JwtAuthenticationFilter;
-import org.springframework.http.HttpMethod;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -33,38 +33,24 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        return http
-                .cors(AbstractHttpConfigurer::disable)
-                .csrf(AbstractHttpConfigurer::disable)
+        return http.cors(AbstractHttpConfigurer::disable).csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(
-                        auth -> auth
-                                .requestMatchers(
-                                        "/auth/**",
-                                        "/error",
-                                        "/swagger-ui/**",
-                                        "/v3/api-docs/**"
-                                ).permitAll()
-                                .requestMatchers(HttpMethod.GET,
-                                        "/payments/success",
+                        auth -> auth.requestMatchers("/auth/**", "/error", "/swagger-ui/**",
+                                        "/v3/api-docs/**").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/payments/success",
                                         "/payments/cancel").permitAll()
-                                .requestMatchers(HttpMethod.GET,
-                                        "/cars",
-                                        "/cars/{id}").permitAll()
-                                .anyRequest().authenticated()
-                )
-                .httpBasic(withDefaults())
+                                .requestMatchers(HttpMethod.GET, "/cars", "/cars/{id}").permitAll()
+                                .anyRequest().authenticated()).httpBasic(withDefaults())
                 .sessionManagement(
                         session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtAuthenticationFilter,
                         UsernamePasswordAuthenticationFilter.class)
-                .userDetailsService(userDetailsService)
-                .build();
+                .userDetailsService(userDetailsService).build();
     }
 
     @Bean
     public AuthenticationManager authenticationManager(
-            AuthenticationConfiguration authenticationConfiguration
-    ) throws Exception {
+            AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
     }
 }

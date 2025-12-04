@@ -14,8 +14,12 @@ public interface CarMapper {
     @Mapping(source = "type", target = "carType")
     CarDto toDto(Car car);
 
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "deleted", ignore = true)
     Car toModel(CreateCarRequestDto createCarRequestDto);
 
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "deleted", ignore = true)
     Car updateEntity(CreateCarRequestDto createCarRequestDto, @MappingTarget Car car);
 
 }
