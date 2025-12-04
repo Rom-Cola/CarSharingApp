@@ -14,7 +14,7 @@ public interface PaymentService {
     PaymentStatusResponseDto handleSuccessfulPayment(String sessionId);
 
     PaymentResponseDto createPaymentSession(CreatePaymentRequestDto requestDto,
-                                            UriComponentsBuilder uriComponentsBuilder);
+                                           UriComponentsBuilder uriComponentsBuilder);
 
     PaymentStatusResponseDto handleCancelledPayment(String sessionId);
 

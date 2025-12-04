@@ -211,7 +211,7 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     private SessionCreateParams buildSessionParams(Payment payment,
-                                                   UriComponentsBuilder baseUriBuilder) {
+                                                  UriComponentsBuilder baseUriBuilder) {
         String productName;
         if (payment.getType() == PaymentType.PAYMENT) {
             productName = String.format("Rental of %s %s",
