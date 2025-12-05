@@ -8,7 +8,6 @@ import com.loievroman.carsharingapp.exception.RentalAlreadyReturnedException;
 import com.loievroman.carsharingapp.mapper.RentalMapper;
 import com.loievroman.carsharingapp.model.Car;
 import com.loievroman.carsharingapp.model.Rental;
-import com.loievroman.carsharingapp.model.Role;
 import com.loievroman.carsharingapp.model.User;
 import com.loievroman.carsharingapp.repository.CarRepository;
 import com.loievroman.carsharingapp.repository.RentalRepository;
@@ -50,67 +49,47 @@ public class RentalServiceImpl implements RentalService {
         rental.setReturnDate(rentalRequestDto.getReturnDate());
         Rental savedRental = rentalRepository.save(rental);
 
-        notificationService.sendNewRentalNotification(rental);
+        notificationService.sendNewRentalNotification(savedRental);
 
         return rentalMapper.toDto(savedRental);
     }
 
     @Override
-    public Page<RentalDto> getRentalsByUserIdAndStatus(
-            Long userId,
-            User currentUser,
-            boolean isActive,
-            Pageable pageable
-    ) {
-
-        if (currentUser.getRoles().stream().anyMatch(
-                r -> r.getName().equals(Role.RoleName.MANAGER
-                ))) {
-            return findRentalsForManager(userId, isActive, pageable);
-        } else {
-            return findRentalsForCustomer(currentUser.getId(), isActive, pageable);
-        }
-    }
-
-    private Page<RentalDto> findRentalsForManager(Long userId, boolean isActive,
-                                                  Pageable pageable) {
+    public Page<RentalDto> findByUserIdAndStatus(Long userId, boolean isActive, Pageable pageable) {
         Page<Rental> rentals;
-        if (userId != null) {
-            return findRentalsForCustomer(userId, isActive, pageable);
-        } else {
-            if (isActive) {
-                rentals = rentalRepository.findByActualReturnDateIsNull(pageable);
-            } else {
-                rentals = rentalRepository.findByActualReturnDateIsNotNull(pageable);
-            }
-        }
-
-        return rentals.map(rentalMapper::toDto);
-    }
-
-    private Page<RentalDto> findRentalsForCustomer(Long customerId, boolean isActive,
-                                                   Pageable pageable) {
-        Page<Rental> rentals;
-
         if (isActive) {
-            rentals = rentalRepository.findByUserIdAndActualReturnDateIsNull(customerId, pageable);
+            rentals = rentalRepository.findByUserIdAndActualReturnDateIsNull(userId, pageable);
         } else {
-            rentals =
-                    rentalRepository.findByUserIdAndActualReturnDateIsNotNull(customerId, pageable);
+            rentals = rentalRepository.findByUserIdAndActualReturnDateIsNotNull(userId, pageable);
         }
-
         return rentals.map(rentalMapper::toDto);
     }
 
     @Override
-    public RentalDto getRentalById(Long id, User currentUser) {
+    public Page<RentalDto> findAllByStatus(boolean isActive, Pageable pageable) {
+        Page<Rental> rentals;
+        if (isActive) {
+            rentals = rentalRepository.findByActualReturnDateIsNull(pageable);
+        } else {
+            rentals = rentalRepository.findByActualReturnDateIsNotNull(pageable);
+        }
+        return rentals.map(rentalMapper::toDto);
+    }
+
+    @Override
+    public RentalDto findById(Long id) {
         Rental rental = rentalRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Rental not found with id: " + id));
 
-        boolean isManager = currentUser.getAuthorities().stream()
-                .anyMatch(auth -> auth.getAuthority().equals("ROLE_MANAGER"));
+        return rentalMapper.toDto(rental);
+    }
 
-        if (!isManager && !rental.getUser().getId().equals(currentUser.getId())) {
+    public RentalDto findMyRentalById(Long rentalId, Long userId) {
+        Rental rental = rentalRepository.findById(rentalId)
+                .orElseThrow(() -> new EntityNotFoundException("Rental not found with id: "
+                        + rentalId));
+
+        if (!rental.getUser().getId().equals(userId)) {
             throw new AccessDeniedException("You do not have permission to view this rental.");
         }
 

@@ -27,12 +27,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.util.UriComponentsBuilder;
 
 @Service
 @RequiredArgsConstructor
 public class PaymentServiceImpl implements PaymentService {
-    private static final String SUCCESS_URL = "http://localhost:8080/payments/success";
-    private static final String CANCEL_URL = "http://localhost:8080/payments/cancel";
     private static final BigDecimal FINE_MULTIPLIER = new BigDecimal("1.5");
     private static final String RESPONSE_SUCCESS_STATUS = "SUCCESS";
     private static final String RESPONSE_PENDING_STATUS = "PENDING";
@@ -93,7 +92,8 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     @Transactional
-    public PaymentResponseDto createPaymentSession(CreatePaymentRequestDto requestDto) {
+    public PaymentResponseDto createPaymentSession(CreatePaymentRequestDto requestDto,
+                                                   UriComponentsBuilder uriComponentsBuilder) {
         Optional<Payment> existingPayment = paymentRepository.findByRentalIdAndType(
                 requestDto.getRentalId(),
                 requestDto.getType()
@@ -133,7 +133,7 @@ public class PaymentServiceImpl implements PaymentService {
         Payment savedPayment = paymentRepository.save(payment);
 
         try {
-            SessionCreateParams params = buildSessionParams(savedPayment);
+            SessionCreateParams params = buildSessionParams(savedPayment, uriComponentsBuilder);
             Session session = Session.create(params);
 
             savedPayment.setSessionId(session.getId());
@@ -210,7 +210,8 @@ public class PaymentServiceImpl implements PaymentService {
         return baseFine.multiply(FINE_MULTIPLIER);
     }
 
-    private SessionCreateParams buildSessionParams(Payment payment) {
+    private SessionCreateParams buildSessionParams(Payment payment,
+                                                  UriComponentsBuilder baseUriBuilder) {
         String productName;
         if (payment.getType() == PaymentType.PAYMENT) {
             productName = String.format("Rental of %s %s",
@@ -227,10 +228,22 @@ public class PaymentServiceImpl implements PaymentService {
 
         long amountInCents = payment.getAmountToPay().multiply(BigDecimal.valueOf(100)).longValue();
 
+        String successUrl = baseUriBuilder.cloneBuilder()
+                .replacePath("/payments/success")
+                .replaceQueryParam("session_id", "{CHECKOUT_SESSION_ID}")
+                .build()
+                .toUriString();
+
+        String cancelUrl = baseUriBuilder.cloneBuilder()
+                .replacePath("/payments/cancel")
+                .replaceQueryParam("session_id", "{CHECKOUT_SESSION_ID}")
+                .build()
+                .toUriString();
+
         return SessionCreateParams.builder()
                 .setMode(SessionCreateParams.Mode.PAYMENT)
-                .setSuccessUrl(SUCCESS_URL + "?session_id={CHECKOUT_SESSION_ID}")
-                .setCancelUrl(CANCEL_URL)
+                .setSuccessUrl(successUrl)
+                .setCancelUrl(cancelUrl)
                 .addLineItem(
                         SessionCreateParams.LineItem.builder()
                                 .setPriceData(

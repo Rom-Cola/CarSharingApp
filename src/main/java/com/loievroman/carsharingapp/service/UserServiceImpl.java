@@ -16,7 +16,6 @@ import jakarta.transaction.Transactional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -53,7 +52,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public UserProfileResponseDto updateRole(Long userId, UserRoleUpdateRequestDto requestDto) {
+    public UserProfileResponseDto updateRoles(Long userId, UserRoleUpdateRequestDto requestDto) {
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new EntityNotFoundException("User not found with id: " + userId));
 
@@ -68,59 +67,31 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserProfileResponseDto getMyProfile(Authentication authentication) {
-        User currentUser = (User) authentication.getPrincipal();
-        return userMapper.toProfileDto(currentUser);
+    public UserProfileResponseDto getMyProfile(User user) {
+        return userMapper.toProfileDto(user);
     }
 
     @Override
     @Transactional
-    public UserProfileResponseDto updateMyProfile(Authentication authentication,
+    public UserProfileResponseDto updateMyProfile(User user,
                                                   UserProfileUpdateRequestDto requestDto) {
-        User currentUser = (User) authentication.getPrincipal();
 
         if (requestDto.getEmail() != null) {
-            currentUser.setEmail(requestDto.getEmail());
+            user.setEmail(requestDto.getEmail());
         }
         if (requestDto.getFirstName() != null) {
-            currentUser.setFirstName(requestDto.getFirstName());
+            user.setFirstName(requestDto.getFirstName());
         }
         if (requestDto.getLastName() != null) {
-            currentUser.setLastName(requestDto.getLastName());
+            user.setLastName(requestDto.getLastName());
         }
 
-        User updatedUser = userRepository.save(currentUser);
-
-        return userMapper.toProfileDto(updatedUser);
-    }
-
-    @Override
-    @Transactional
-    public UserProfileResponseDto addRoleToUser(Long userId, UserRoleUpdateRequestDto requestDto) {
-        User user = userRepository.findById(userId).orElseThrow(
-                () -> new EntityNotFoundException("User not found with id: " + userId));
-
-        requestDto.getRoles().forEach(roleName -> {
-            Role role = roleRepository.findByName(roleName)
-                    .orElseThrow(() -> new EntityNotFoundException("Role not found: " + roleName));
-            user.getRoles().add(role);
-        });
-
         return userMapper.toProfileDto(user);
     }
 
     @Override
-    @Transactional
-    public UserProfileResponseDto removeRoleFromUser(Long userId,
-                                                     UserRoleUpdateRequestDto requestDto) {
-        User user = userRepository.findById(userId).orElseThrow(
-                () -> new EntityNotFoundException("User not found with id: " + userId));
-
-        requestDto.getRoles().forEach(roleName -> user.getRoles()
-                .remove(roleRepository.findByName(roleName).orElseThrow(
-                        () -> new EntityNotFoundException("Role not found: " + roleName))));
-
-        return userMapper.toProfileDto(user);
+    public boolean existsById(Long userId) {
+        return userRepository.existsById(userId);
     }
 
 }

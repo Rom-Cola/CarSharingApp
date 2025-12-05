@@ -84,4 +84,9 @@ public class User implements UserDetails {
     public boolean isEnabled() {
         return !isDeleted;
     }
+
+    public boolean isManager() {
+        return roles.stream()
+                .anyMatch(role -> role.getName() == Role.RoleName.MANAGER);
+    }
 }

@@ -13,6 +13,7 @@ public interface PaymentMapper {
 
     @Mapping(source = "type", target = "paymentType")
     @Mapping(source = "status", target = "paymentStatus")
+    @Mapping(source = "rental.id", target = "rentalId")
     PaymentDto toDto(Payment payment);
 
     Payment toModel(CreatePaymentRequestDto paymentDto);

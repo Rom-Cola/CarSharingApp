@@ -6,19 +6,17 @@ import com.loievroman.carsharingapp.dto.user.UserRegistrationRequestDto;
 import com.loievroman.carsharingapp.dto.user.UserResponseDto;
 import com.loievroman.carsharingapp.dto.user.UserRoleUpdateRequestDto;
 import com.loievroman.carsharingapp.exception.RegistrationException;
-import org.springframework.security.core.Authentication;
+import com.loievroman.carsharingapp.model.User;
 
 public interface UserService {
     UserResponseDto register(UserRegistrationRequestDto requestDto) throws RegistrationException;
 
-    UserProfileResponseDto updateRole(Long userId, UserRoleUpdateRequestDto requestDto);
+    UserProfileResponseDto updateRoles(Long userId, UserRoleUpdateRequestDto requestDto);
 
-    UserProfileResponseDto getMyProfile(Authentication authentication);
+    UserProfileResponseDto getMyProfile(User user);
 
-    UserProfileResponseDto updateMyProfile(Authentication authentication,
+    UserProfileResponseDto updateMyProfile(User user,
                                            UserProfileUpdateRequestDto requestDto);
 
-    UserProfileResponseDto addRoleToUser(Long userId, UserRoleUpdateRequestDto requestDto);
-
-    UserProfileResponseDto removeRoleFromUser(Long userId, UserRoleUpdateRequestDto requestDto);
+    boolean existsById(Long userId);
 }
