@@ -30,6 +30,10 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
+@Sql(scripts = "classpath:database/add-car.sql",
+        executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+@Sql(scripts = "classpath:database/remove-all-data.sql",
+        executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 class CarControllerTest {
 
     protected static MockMvc mockMvc;
@@ -48,10 +52,6 @@ class CarControllerTest {
     @Test
     @DisplayName("Create a new car")
     @WithMockUser(roles = "MANAGER")
-    @Sql(scripts = "classpath:database/cars/add-car.sql",
-            executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-    @Sql(scripts = "classpath:database/cars/add-car.sql",
-            executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void createCar_ValidRequestDto_Success() throws Exception {
         // given
         CreateCarRequestDto requestDto = new CreateCarRequestDto()
@@ -80,8 +80,6 @@ class CarControllerTest {
     @Test
     @DisplayName("Get all cars")
     @WithMockUser
-    @Sql(scripts = "classpath:database/cars/add-car.sql",
-            executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
     void getAll_ReturnsListOfCars() throws Exception {
         // when
         MvcResult result = mockMvc
@@ -101,8 +99,6 @@ class CarControllerTest {
     @Test
     @DisplayName("Get car by ID")
     @WithMockUser
-    @Sql(scripts = "classpath:database/cars/add-car.sql",
-            executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
     void getCarById_ValidId_ReturnsCar() throws Exception {
         // when
         MvcResult result = mockMvc
@@ -120,8 +116,6 @@ class CarControllerTest {
     @Test
     @DisplayName("Update a car")
     @WithMockUser(roles = "MANAGER")
-    @Sql(scripts = "classpath:database/cars/add-car.sql",
-            executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
     void updateCar_ValidRequest_Success() throws Exception {
         // given
         CreateCarRequestDto requestDto = new CreateCarRequestDto()
@@ -150,8 +144,6 @@ class CarControllerTest {
     @Test
     @DisplayName("Delete a car")
     @WithMockUser(roles = "MANAGER")
-    @Sql(scripts = "classpath:database/cars/add-car.sql",
-            executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
     void deleteCar_ValidId_Success() throws Exception {
         // when & then
         mockMvc

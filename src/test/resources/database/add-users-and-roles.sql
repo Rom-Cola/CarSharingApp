@@ -1,8 +1,3 @@
-DELETE FROM rentals;
-DELETE FROM users_roles;
-DELETE FROM users;
-DELETE FROM roles;
-
 ALTER TABLE roles AUTO_INCREMENT = 1;
 ALTER TABLE users AUTO_INCREMENT = 1;
 

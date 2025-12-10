@@ -29,6 +29,10 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
+@Sql(scripts = "classpath:database/add-rental.sql",
+        executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+@Sql(scripts = "classpath:database/remove-all-data.sql",
+        executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 class RentalControllerTest {
 
     protected static MockMvc mockMvc;
@@ -48,8 +52,6 @@ class RentalControllerTest {
     @DisplayName("Create a new rental")
     @WithUserDetails(value = "customer@example.com",
             setupBefore = TestExecutionEvent.TEST_EXECUTION)
-    @Sql(scripts = "classpath:database/rentals/add-rental.sql",
-            executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
     void createRental_ValidRequest_Success() throws Exception {
         // given
         CreateRentalRequestDto requestDto = new CreateRentalRequestDto();
@@ -78,8 +80,6 @@ class RentalControllerTest {
     @DisplayName("Get rentals by user and status")
     @WithUserDetails(value = "customer@example.com",
             setupBefore = TestExecutionEvent.TEST_EXECUTION)
-    @Sql(scripts = "classpath:database/rentals/add-rental.sql",
-            executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
     void getRentalsByUserAndStatus_ReturnsRentals() throws Exception {
         // when
         MvcResult result = mockMvc
@@ -100,8 +100,6 @@ class RentalControllerTest {
     @DisplayName("Get rental by ID")
     @WithUserDetails(value = "customer@example.com",
             setupBefore = TestExecutionEvent.TEST_EXECUTION)
-    @Sql(scripts = "classpath:database/rentals/add-rental.sql",
-            executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
     void getRentalById_ValidId_ReturnsRental() throws Exception {
         // when
         MvcResult result = mockMvc
@@ -119,8 +117,6 @@ class RentalControllerTest {
     @Test
     @DisplayName("Set actual return date")
     @WithMockUser(roles = "MANAGER")
-    @Sql(scripts = "classpath:database/rentals/add-rental.sql",
-            executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
     void setActualReturnDate_ValidId_Success() throws Exception {
         // when
         MvcResult result = mockMvc
