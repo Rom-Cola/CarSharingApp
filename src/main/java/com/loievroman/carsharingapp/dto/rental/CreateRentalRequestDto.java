@@ -5,9 +5,11 @@ import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.Accessors;
 
 @Getter
 @Setter
+@Accessors(chain = true)
 public class CreateRentalRequestDto {
     @NotNull
     private Long carId;

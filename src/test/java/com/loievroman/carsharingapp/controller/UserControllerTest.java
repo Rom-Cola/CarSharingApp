@@ -29,11 +29,12 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @Sql(scripts = "classpath:database/users/add-users-and-roles.sql",
         executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 class UserControllerTest {
 
+    @Autowired
     protected static MockMvc mockMvc;
 
     @Autowired

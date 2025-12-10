@@ -3,17 +3,14 @@ package com.loievroman.carsharingapp.controller;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.loievroman.carsharingapp.dto.car.CarDto;
-import com.loievroman.carsharingapp.dto.car.CreateCarRequestDto;
-import com.loievroman.carsharingapp.model.CarType;
-import java.math.BigDecimal;
+import com.loievroman.carsharingapp.dto.rental.CreateRentalRequestDto;
+import com.loievroman.carsharingapp.dto.rental.RentalDto;
+import java.time.LocalDate;
 import java.util.List;
 import lombok.Data;
 import org.junit.jupiter.api.BeforeAll;
@@ -22,7 +19,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.TestExecutionEvent;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -30,7 +29,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
-class CarControllerTest {
+class RentalControllerTest {
 
     protected static MockMvc mockMvc;
 
@@ -46,117 +45,97 @@ class CarControllerTest {
     }
 
     @Test
-    @DisplayName("Create a new car")
-    @WithMockUser(roles = "MANAGER")
-    @Sql(scripts = "classpath:database/cars/add-car.sql",
+    @DisplayName("Create a new rental")
+    @WithUserDetails(value = "customer@example.com",
+            setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @Sql(scripts = "classpath:database/rentals/add-rental.sql",
             executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-    @Sql(scripts = "classpath:database/cars/add-car.sql",
-            executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-    void createCar_ValidRequestDto_Success() throws Exception {
+    void createRental_ValidRequest_Success() throws Exception {
         // given
-        CreateCarRequestDto requestDto = new CreateCarRequestDto()
-                .setModel("Model S")
-                .setBrand("Tesla")
-                .setType(CarType.SEDAN)
-                .setInventory(5)
-                .setDailyFee(BigDecimal.valueOf(200.00));
+        CreateRentalRequestDto requestDto = new CreateRentalRequestDto();
+        requestDto.setCarId(1L);
+        requestDto.setReturnDate(LocalDate
+                .now()
+                .plusDays(5));
 
         // when
         MvcResult result = mockMvc
-                .perform(post("/cars")
+                .perform(post("/rentals")
                         .content(objectMapper.writeValueAsString(requestDto))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated())
                 .andReturn();
 
         // then
-        CarDto actual = objectMapper.readValue(result
+        RentalDto actual = objectMapper.readValue(result
                 .getResponse()
-                .getContentAsString(), CarDto.class);
+                .getContentAsString(), RentalDto.class);
         assertNotNull(actual.getId());
-        assertEquals(requestDto.getModel(), actual.getModel());
+        assertEquals(requestDto.getCarId(), actual.getCarId());
     }
 
     @Test
-    @DisplayName("Get all cars")
-    @WithMockUser
-    @Sql(scripts = "classpath:database/cars/add-car.sql",
+    @DisplayName("Get rentals by user and status")
+    @WithUserDetails(value = "customer@example.com",
+            setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @Sql(scripts = "classpath:database/rentals/add-rental.sql",
             executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-    void getAll_ReturnsListOfCars() throws Exception {
+    void getRentalsByUserAndStatus_ReturnsRentals() throws Exception {
         // when
         MvcResult result = mockMvc
-                .perform(get("/cars"))
+                .perform(get("/rentals/my").param("is_active", "true"))
                 .andExpect(status().isOk())
                 .andReturn();
 
         // then
-        PageWrapper<CarDto> actual = objectMapper.readValue(result
+        PageWrapper<RentalDto> actual = objectMapper.readValue(result
                 .getResponse()
                 .getContentAsString(), objectMapper
                 .getTypeFactory()
-                .constructParametricType(PageWrapper.class, CarDto.class));
+                .constructParametricType(PageWrapper.class, RentalDto.class));
         assertEquals(1, actual.getTotalElements());
     }
 
     @Test
-    @DisplayName("Get car by ID")
-    @WithMockUser
-    @Sql(scripts = "classpath:database/cars/add-car.sql",
+    @DisplayName("Get rental by ID")
+    @WithUserDetails(value = "customer@example.com",
+            setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @Sql(scripts = "classpath:database/rentals/add-rental.sql",
             executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-    void getCarById_ValidId_ReturnsCar() throws Exception {
+    void getRentalById_ValidId_ReturnsRental() throws Exception {
         // when
         MvcResult result = mockMvc
-                .perform(get("/cars/1"))
+                .perform(get("/rentals/my/1"))
                 .andExpect(status().isOk())
                 .andReturn();
 
         // then
-        CarDto actual = objectMapper.readValue(result
+        RentalDto actual = objectMapper.readValue(result
                 .getResponse()
-                .getContentAsString(), CarDto.class);
+                .getContentAsString(), RentalDto.class);
         assertEquals(1L, actual.getId());
     }
 
     @Test
-    @DisplayName("Update a car")
+    @DisplayName("Set actual return date")
     @WithMockUser(roles = "MANAGER")
-    @Sql(scripts = "classpath:database/cars/add-car.sql",
+    @Sql(scripts = "classpath:database/rentals/add-rental.sql",
             executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-    void updateCar_ValidRequest_Success() throws Exception {
-        // given
-        CreateCarRequestDto requestDto = new CreateCarRequestDto()
-                .setModel("Q7")
-                .setBrand("Audi")
-                .setType(CarType.SUV)
-                .setInventory(15)
-                .setDailyFee(BigDecimal.valueOf(180.00));
-
+    void setActualReturnDate_ValidId_Success() throws Exception {
         // when
         MvcResult result = mockMvc
-                .perform(put("/cars/1")
-                        .content(objectMapper.writeValueAsString(requestDto))
-                        .contentType(MediaType.APPLICATION_JSON))
+                .perform(post("/rentals/1/return"))
                 .andExpect(status().isOk())
                 .andReturn();
 
         // then
-        CarDto actual = objectMapper.readValue(result
+        RentalDto actual = objectMapper.readValue(result
                 .getResponse()
-                .getContentAsString(), CarDto.class);
-        assertEquals("Q7", actual.getModel());
-        assertEquals(15, actual.getInventory());
-    }
-
-    @Test
-    @DisplayName("Delete a car")
-    @WithMockUser(roles = "MANAGER")
-    @Sql(scripts = "classpath:database/cars/add-car.sql",
-            executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-    void deleteCar_ValidId_Success() throws Exception {
-        // when & then
-        mockMvc
-                .perform(delete("/cars/1"))
-                .andExpect(status().isNoContent());
+                .getContentAsString(), RentalDto.class);
+        RentalDto updatedRental = objectMapper.readValue(result
+                .getResponse()
+                .getContentAsString(), RentalDto.class);
+        assertNotNull(updatedRental.getActualReturnDate());
     }
 
     @Data

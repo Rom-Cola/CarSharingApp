@@ -41,12 +41,13 @@ class CarServiceTest {
     @DisplayName("Save a new car")
     void save_ValidRequest_ReturnsCarDto() {
         // given
-        CreateCarRequestDto requestDto = new CreateCarRequestDto().setModel("Model S")
-                                                                  .setBrand("Tesla")
-                                                                  .setType(CarType.SEDAN)
-                                                                  .setInventory(5)
-                                                                  .setDailyFee(BigDecimal
-                                                                          .valueOf(200.00));
+        CreateCarRequestDto requestDto = new CreateCarRequestDto()
+                .setModel("Model S")
+                .setBrand("Tesla")
+                .setType(CarType.SEDAN)
+                .setInventory(5)
+                .setDailyFee(BigDecimal
+                        .valueOf(200.00));
 
         Car car = new Car();
         car.setId(1L);
@@ -88,7 +89,10 @@ class CarServiceTest {
 
         // then
         assertEquals(1, result.getTotalElements());
-        assertEquals(carDto.getId(), result.getContent().get(0).getId());
+        assertEquals(carDto.getId(), result
+                .getContent()
+                .get(0)
+                .getId());
     }
 
     @Test
