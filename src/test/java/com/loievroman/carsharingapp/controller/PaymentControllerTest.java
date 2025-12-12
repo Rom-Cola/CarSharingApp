@@ -15,6 +15,7 @@ import com.loievroman.carsharingapp.dto.payment.PaymentDto;
 import com.loievroman.carsharingapp.dto.payment.PaymentResponseDto;
 import com.loievroman.carsharingapp.dto.payment.PaymentStatusResponseDto;
 import com.loievroman.carsharingapp.model.PaymentType;
+import com.loievroman.carsharingapp.service.NotificationService;
 import com.loievroman.carsharingapp.service.PaymentService;
 import com.loievroman.carsharingapp.service.UserService;
 import java.util.List;
@@ -36,10 +37,13 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
-@Sql(scripts = "classpath:database/add-users-and-roles.sql",
-        executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-@Sql(scripts = "classpath:database/remove-all-data.sql",
-        executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+@Sql(
+        scripts = {
+                "classpath:database/remove-all-data.sql",
+                "classpath:database/add-users-and-roles.sql"
+        },
+        executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
+)
 class PaymentControllerTest {
 
     protected static MockMvc mockMvc;
@@ -49,6 +53,9 @@ class PaymentControllerTest {
 
     @MockitoBean
     private PaymentService paymentService;
+
+    @MockitoBean
+    private NotificationService notificationService;
 
     @Autowired // Використовуємо реальний UserService для перевірки існування юзера
     private UserService userService;

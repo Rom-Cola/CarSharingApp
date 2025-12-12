@@ -30,10 +30,13 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
-@Sql(scripts = "classpath:database/add-users-and-roles.sql",
-        executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-@Sql(scripts = "classpath:database/remove-all-data.sql",
-        executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+@Sql(
+        scripts = {
+                "classpath:database/remove-all-data.sql",
+                "classpath:database/add-users-and-roles.sql"
+        },
+        executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
+)
 class UserControllerTest {
 
     @Autowired

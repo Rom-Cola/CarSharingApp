@@ -10,6 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.loievroman.carsharingapp.dto.rental.CreateRentalRequestDto;
 import com.loievroman.carsharingapp.dto.rental.RentalDto;
+import com.loievroman.carsharingapp.service.NotificationService;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.Data;
@@ -22,6 +23,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.TestExecutionEvent;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.context.support.WithUserDetails;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -29,16 +31,22 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
-@Sql(scripts = "classpath:database/add-rental.sql",
-        executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-@Sql(scripts = "classpath:database/remove-all-data.sql",
-        executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+@Sql(
+        scripts = {
+                "classpath:database/remove-all-data.sql",
+                "classpath:database/add-rental.sql"
+        },
+        executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
+)
 class RentalControllerTest {
 
     protected static MockMvc mockMvc;
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @MockitoBean
+    private NotificationService notificationService;
 
     @BeforeAll
     static void beforeAll(@Autowired WebApplicationContext applicationContext) {
