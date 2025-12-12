@@ -63,7 +63,7 @@ public class UserServiceImpl implements UserService {
 
         user.setRoles(newRoles);
 
-        return userMapper.toProfileDto(user);
+        return userMapper.toProfileDto(userRepository.save(user));
     }
 
     @Override
@@ -75,18 +75,20 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public UserProfileResponseDto updateMyProfile(User user,
                                                   UserProfileUpdateRequestDto requestDto) {
+        User userFromDb = userRepository.findById(user.getId()).orElseThrow(
+                () -> new EntityNotFoundException("User not found with id: " + user.getId()));
 
         if (requestDto.getEmail() != null) {
-            user.setEmail(requestDto.getEmail());
+            userFromDb.setEmail(requestDto.getEmail());
         }
         if (requestDto.getFirstName() != null) {
-            user.setFirstName(requestDto.getFirstName());
+            userFromDb.setFirstName(requestDto.getFirstName());
         }
         if (requestDto.getLastName() != null) {
-            user.setLastName(requestDto.getLastName());
+            userFromDb.setLastName(requestDto.getLastName());
         }
 
-        return userMapper.toProfileDto(user);
+        return userMapper.toProfileDto(userRepository.save(userFromDb));
     }
 
     @Override
