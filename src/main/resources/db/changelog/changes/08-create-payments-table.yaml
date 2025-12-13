@@ -1,0 +1,49 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-payments-table
+      author: Loiev Roman
+      changes:
+        - createTable:
+            tableName: payments
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: status
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: type
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: rental_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_payments_rentals
+                    references: rentals(id)
+              - column:
+                  name: session_url
+                  type: VARCHAR(1024)
+              - column:
+                  name: session_id
+                  type: VARCHAR(255)
+                  constraints:
+                    unique: true
+              - column:
+                  name: amount_to_pay
+                  type: DECIMAL(10, 2)
+                  constraints:
+                    nullable: false
+              - addUniqueConstraint:
+                  tableName: payments
+                  columnNames: rental_id, type
+                  constraintName: uq_rental_id_type

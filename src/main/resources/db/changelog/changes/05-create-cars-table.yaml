@@ -1,0 +1,47 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-cars-table
+      author: Loiev Roman
+      changes:
+        - createTable:
+            tableName: cars
+            columns:
+              - column:
+                  autoIncrement: true
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_car
+                  name: id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: model
+                  type: VARCHAR(255)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: brand
+                  type: VARCHAR(255)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: type
+                  type: VARCHAR(255)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: inventory
+                  type: INT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: daily_fee
+                  type: DECIMAL(10,2)
+              - column:
+                  name: is_deleted
+                  type: TINYINT
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
