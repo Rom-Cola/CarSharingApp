@@ -29,7 +29,7 @@ Welcome to CarSharingApp! This is an API (backend service) for managing a city c
 
 ## Entity relations diagram
 
-![img.png](assets/images/ER diagram.png)
+![img.png](assets/images/ER_diagram.png)
 
 ## What the API Can Do
 
